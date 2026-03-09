@@ -8,9 +8,10 @@ defmodule Passbook.Helpers do
 
   # Camelize strings in a map
   def camelize(key) when is_binary(key) do
-    capitalized = Macro.camelize(key)
-    <<first>> <> rest = capitalized
-    String.downcase(<<first>>) <> rest
+    key
+    |> Macro.camelize()
+    |> downcase_first()
+    |> fix_acronyms()
   end
 
   # if a nested map, camelize the nested map keys
@@ -56,5 +57,17 @@ defmodule Passbook.Helpers do
     map
     |> Enum.map(&__MODULE__.camelize/1)
     |> Map.new()
+  end
+
+  defp downcase_first(<<first>> <> rest) do
+    String.downcase(<<first>>) <> rest
+  end
+
+  defp fix_acronyms(string) do
+    string
+    |> String.replace(~r/Url$/, "URL")
+    |> String.replace(~r/Url([A-Z])/, "URL\\1")
+    |> String.replace(~r/Uri$/, "URI")
+    |> String.replace(~r/Uri([A-Z])/, "URI\\1")
   end
 end
